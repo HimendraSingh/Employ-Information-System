@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeForm from "../components/EmployeeForm";
-import { API_BASE_URL } from "../config";
+
+const BACKEND_URL = "https://employ-information-system.onrender.com";
 
 const AddEmployee = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const AddEmployee = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`${API_BASE_URL}/api/employees`, {
+      const response = await fetch(`${BACKEND_URL}/api/employees`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
