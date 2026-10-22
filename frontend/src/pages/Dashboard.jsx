@@ -18,110 +18,6 @@ const departments = [
   "Store",
 ];
 
-const mockEmployeesList = [
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c01",
-    name: "Ramesh Sharma",
-    email: "r.sharma@iffco.in",
-    phone: "+91 94501 23456",
-    department: "Systems",
-    designation: "Senior Plant Engineer",
-    shift: "Shift A (Morning 06:00 - 14:00)",
-    attendanceStatus: "Present",
-    punchIn: "05:52 AM",
-    punchOut: "02:05 PM",
-    salary: 68000,
-    paymentStatus: "Paid",
-    joiningDate: "2021-03-15T00:00:00.000Z",
-  },
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c02",
-    name: "Amit Patel",
-    email: "a.patel@iffco.in",
-    phone: "+91 98390 45678",
-    department: "IT Sector",
-    designation: "Systems Analyst",
-    shift: "General Shift (09:00 - 17:30)",
-    attendanceStatus: "Present",
-    punchIn: "08:55 AM",
-    punchOut: "05:32 PM",
-    salary: 62000,
-    paymentStatus: "Paid",
-    joiningDate: "2020-07-01T00:00:00.000Z",
-  },
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c03",
-    name: "Sunita Verma",
-    email: "s.verma@iffco.in",
-    phone: "+91 97920 89012",
-    department: "HR",
-    designation: "HR Officer",
-    shift: "General Shift (09:00 - 17:30)",
-    attendanceStatus: "Present",
-    punchIn: "09:02 AM",
-    punchOut: "05:30 PM",
-    salary: 54000,
-    paymentStatus: "Paid",
-    joiningDate: "2022-11-10T00:00:00.000Z",
-  },
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c04",
-    name: "Vikas Singh",
-    email: "v.singh@iffco.in",
-    phone: "+91 91250 67890",
-    department: "Production",
-    designation: "Plant Supervisor",
-    shift: "Shift B (Evening 14:00 - 22:00)",
-    attendanceStatus: "Present",
-    punchIn: "01:48 PM",
-    punchOut: "10:04 PM",
-    salary: 72000,
-    paymentStatus: "Paid",
-    joiningDate: "2019-05-20T00:00:00.000Z",
-  },
-  {
-    _id: "665f1a2b3c4d5e6f7a8b9c05",
-    name: "Pooja Mishra",
-    email: "p.mishra@iffco.in",
-    phone: "+91 93350 34567",
-    department: "Safety",
-    designation: "Safety Officer",
-    shift: "Shift C (Night 22:00 - 06:00)",
-    attendanceStatus: "Present",
-    punchIn: "09:50 PM",
-    punchOut: "06:08 AM",
-    salary: 59000,
-    paymentStatus: "Paid",
-    joiningDate: "2023-01-15T00:00:00.000Z",
-  },
-];
-
-const mockStatsData = {
-  totalEmployees: 5,
-  totalWorkforce: 5,
-  presentToday: 5,
-  absentToday: 0,
-  onLeaveToday: 0,
-  monthlyPayroll: 315000,
-  paidCount: 5,
-  dueCount: 0,
-  departmentCounts: {
-    Production: 1,
-    Systems: 1,
-    "IT Sector": 1,
-    Safety: 1,
-    HR: 1,
-    Finance: 0,
-    Store: 0,
-  },
-  shiftCounts: {
-    morning: 1,
-    evening: 1,
-    night: 1,
-    general: 2,
-  },
-};
-
 const Dashboard = () => {
   const navigate = useNavigate();
 
@@ -159,12 +55,9 @@ const Dashboard = () => {
       if (response.ok) {
         const statsData = await response.json();
         setStats(statsData);
-      } else {
-        setStats(mockStatsData);
       }
     } catch (error) {
-      console.warn("Backend offline, using fallback stats:", error.message);
-      setStats(mockStatsData);
+      console.error("Stats load warning:", error.message);
     }
   };
 
@@ -200,27 +93,7 @@ const Dashboard = () => {
 
       fetchStats();
     } catch (error) {
-      console.warn("Backend offline, loading fallback employees list:", error.message);
-      let filtered = [...mockEmployeesList];
-
-      if (selectedDepartment && selectedDepartment !== "All Departments") {
-        filtered = filtered.filter((emp) => emp.department === selectedDepartment);
-      }
-
-      if (searchTerm) {
-        filtered = filtered.filter(
-          (emp) =>
-            emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            emp.department.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
-      setEmployees(filtered);
-      setTotalPages(1);
-      setTotalEmployees(filtered.length);
-      setErrorMessage("");
-      fetchStats();
+      setErrorMessage(error.message || "Something went wrong while fetching data");
     } finally {
       setIsLoading(false);
     }
@@ -258,15 +131,13 @@ const Dashboard = () => {
       });
 
       if (!response.ok) {
-        setEmployees((prev) => prev.filter((emp) => emp._id !== id));
-        setTotalEmployees((prev) => Math.max(0, prev - 1));
+        alert("Failed to delete employee. Please try again.");
         return;
       }
 
       fetchEmployees();
     } catch (error) {
-      setEmployees((prev) => prev.filter((emp) => emp._id !== id));
-      setTotalEmployees((prev) => Math.max(0, prev - 1));
+      alert("Error deleting employee: " + error.message);
     }
   };
 
@@ -284,19 +155,9 @@ const Dashboard = () => {
 
       if (response.ok) {
         fetchEmployees();
-      } else {
-        setEmployees((prev) =>
-          prev.map((emp) =>
-            emp._id === id ? { ...emp, paymentStatus: nextStatus } : emp
-          )
-        );
       }
     } catch (error) {
-      setEmployees((prev) =>
-        prev.map((emp) =>
-          emp._id === id ? { ...emp, paymentStatus: nextStatus } : emp
-        )
-      );
+      console.error("Toggle payment status error:", error.message);
     }
   };
 
@@ -304,23 +165,17 @@ const Dashboard = () => {
     setIsExporting(true);
     try {
       const token = localStorage.getItem("token");
-      let exportList = [];
+      const response = await fetch(`${API_BASE_URL}/api/employees/export`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/employees/export`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (response.ok) {
-          exportList = await response.json();
-        } else {
-          exportList = employees;
-        }
-      } catch {
-        exportList = employees;
+      if (!response.ok) {
+        throw new Error("Failed to fetch export data");
       }
 
+      const exportList = await response.json();
       if (!exportList || exportList.length === 0) {
         alert("No employees found to export.");
         setIsExporting(false);
