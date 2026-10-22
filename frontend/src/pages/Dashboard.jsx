@@ -84,21 +84,55 @@ const mockEmployeesList = [
 const mockStatsData = {
   totalEmployees: 5,
   totalPayroll: 301000,
+  monthlyPayroll: 301000,
+  totalSalary: 301000,
   averageSalary: 60200,
   activeDivisions: 5,
+  presentCount: 5,
+  absentCount: 0,
+  leaveCount: 0,
+  paidCount: 5,
+  dueCount: 0,
+  attendance: {
+    present: 5,
+    absent: 0,
+    leave: 0,
+  },
+  payroll: {
+    total: 301000,
+    paid: 5,
+    due: 0,
+  },
   departmentDistribution: [
-    { _id: "Systems", count: 1 },
-    { _id: "IT Sector", count: 1 },
-    { _id: "HR", count: 1 },
-    { _id: "Finance", count: 1 },
-    { _id: "Safety", count: 1 },
+    { department: "Production", _id: "Production", count: 1, percentage: 20 },
+    { department: "Systems", _id: "Systems", count: 1, percentage: 20 },
+    { department: "IT Sector", _id: "IT Sector", count: 1, percentage: 20 },
+    { department: "Safety", _id: "Safety", count: 1, percentage: 20 },
+    { department: "HR", _id: "HR", count: 1, percentage: 20 },
+    { department: "Finance", _id: "Finance", count: 0, percentage: 0 },
+    { department: "Store", _id: "Store", count: 0, percentage: 0 },
   ],
   shiftDistribution: [
-    { _id: "Shift A Morning", count: 1 },
-    { _id: "General Shift", count: 2 },
-    { _id: "Shift B Evening", count: 1 },
-    { _id: "Shift C Night", count: 1 },
+    { shift: "Shift A (Morning 06:00 - 14:00)", _id: "Shift A Morning", count: 1 },
+    { shift: "Shift B (Evening 14:00 - 22:00)", _id: "Shift B Evening", count: 1 },
+    { shift: "Shift C (Night 22:00 - 06:00)", _id: "Shift C Night", count: 1 },
+    { shift: "General Shift (09:00 - 17:30)", _id: "General Shift", count: 2 },
   ],
+  shifts: {
+    morning: 1,
+    evening: 1,
+    night: 1,
+    general: 2,
+  },
+  departments: {
+    Production: 1,
+    Systems: 1,
+    "IT Sector": 1,
+    Safety: 1,
+    HR: 1,
+    Finance: 0,
+    Store: 0,
+  },
 };
 
 const Dashboard = () => {
@@ -109,7 +143,6 @@ const Dashboard = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
 
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -142,14 +175,13 @@ const Dashboard = () => {
         throw new Error("Stats request failed");
       }
     } catch (error) {
-      console.warn("Backend offline, using fallback stats:", error.message);
+      console.warn("Backend offline, loading fallback stats:", error.message);
       setStats(mockStatsData);
     }
   };
 
   const fetchEmployees = async () => {
     setIsLoading(true);
-    setErrorMessage("");
 
     try {
       const token = localStorage.getItem("token");
@@ -175,7 +207,7 @@ const Dashboard = () => {
         throw new Error("Employees request failed");
       }
     } catch (error) {
-      console.warn("Backend offline, using fallback employees list:", error.message);
+      console.warn("Backend offline, loading fallback employees list:", error.message);
       let filtered = [...mockEmployeesList];
 
       if (selectedDepartment !== "All Departments") {
@@ -194,7 +226,6 @@ const Dashboard = () => {
       setEmployees(filtered);
       setTotalEmployees(filtered.length);
       setTotalPages(1);
-      setErrorMessage("");
     } finally {
       setIsLoading(false);
     }
@@ -297,14 +328,6 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-
-      {/* Error Banner */}
-      {errorMessage && (
-        <div className="error-banner">
-          ⚠️ {errorMessage}
-          <button onClick={fetchEmployees} className="btn-retry">Retry</button>
-        </div>
-      )}
 
       {/* Employee Table */}
       <EmployeeTable
