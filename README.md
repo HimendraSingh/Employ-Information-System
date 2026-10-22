@@ -142,4 +142,4 @@ Open **`http://localhost:5173`** in your browser!
 ---
 
 ## 📄 License
-ISC License — Created for educational purpose (B.Tech CSE Project).
+ISC License — Created for educational purpose (B.Tech CSE Project) .
