@@ -7,6 +7,9 @@ import AttendanceModal from "../components/AttendanceModal";
 import IdCardModal from "../components/IdCardModal";
 import { API_BASE_URL } from "../config";
 
+const RENDER_BACKEND_URL = "https://employ-information-system.onrender.com";
+const effectiveApiUrl = API_BASE_URL || RENDER_BACKEND_URL;
+
 const departments = [
   "All Departments",
   "Production",
@@ -46,7 +49,7 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/api/employees/stats`, {
+      const response = await fetch(`${effectiveApiUrl}/api/employees/stats`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -68,7 +71,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
 
-      let url = `${API_BASE_URL}/api/employees?page=${currentPage}&limit=5`;
+      let url = `${effectiveApiUrl}/api/employees?page=${currentPage}&limit=5`;
       if (searchTerm) {
         url += `&search=${encodeURIComponent(searchTerm)}`;
       }
@@ -123,7 +126,7 @@ const Dashboard = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/api/employees/${id}`, {
+      const response = await fetch(`${effectiveApiUrl}/api/employees/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -144,7 +147,7 @@ const Dashboard = () => {
   const handleTogglePaymentStatus = async (id, nextStatus) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/api/employees/${id}/payment`, {
+      const response = await fetch(`${effectiveApiUrl}/api/employees/${id}/payment`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -165,7 +168,7 @@ const Dashboard = () => {
     setIsExporting(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/api/employees/export`, {
+      const response = await fetch(`${effectiveApiUrl}/api/employees/export`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -453,7 +456,17 @@ const Dashboard = () => {
           </div>
           <div className="footer-right">
             <span>Plant Workforce Management & Gate Pass System v2.4</span>
-            <p>Confidential Plant Portal • Developed by Himendra Singh (B.Tech CSE)</p>
+            <p>
+              Render Live API:{" "}
+              <a
+                href={RENDER_BACKEND_URL}
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "#a7f3d0", textDecoration: "underline" }}
+              >
+                {RENDER_BACKEND_URL}
+              </a>
+            </p>
           </div>
         </div>
       </footer>
